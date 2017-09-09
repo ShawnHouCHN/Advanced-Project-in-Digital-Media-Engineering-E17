@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <title>US Urban Area Voronoi</title>
     <link rel="stylesheet" href="./style.css"/>
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.css"/>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
     <script src="http://d3js.org/d3.v4.min.js"></script>
     <script src="//d3js.org/d3-queue.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="./d3.geo.voronoi.js?1"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.12.0/mapbox-gl.js'></script>
   </head>
   <body>
     <div id="map"></div>
@@ -18,25 +18,47 @@
     var width = 1800,
         height = 1500;
 
-    var projection = d3.geoAlbers()
-        .scale(800)
+    // mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpbWl6dSIsImEiOiI0cl85c2pNIn0.RefZMaOzNn-IistVe-Zcnw'
+        
+    // //Setup mapbox-gl map
+    // var map = new mapboxgl.Map({
+    //     container: 'map', // container id
+    //     style: 'mapbox://styles/mapbox/streets-v8',
+    //     center: [-106, 37.5],
+    //     zoom: 4,  
+    // });
+    
+    // map.addControl(new mapboxgl.Navigation());
+
+    // var container = map.getCanvasContainer()
+
+
+    var projection = d3.geoMercator()
+        .scale(850)
         .translate([width/2,height/2])
+        .center([-106, 37.5])
         .precision(0.01);
 
     var path = d3.geoPath()
         .projection(projection)
         .pointRadius(0.5);
 
-    var svg = d3.selectAll("#map").append("svg")
+
+    var svg = d3.select("#map").append("svg")
         .attr("width", width)
         .attr("height", height);
 
-    //var fill = d3.scaleOrdinal(d3.schemeCategory20c);
+    // var transform = d3.geoTransform({point: projectPoint});
+    // var path = d3.geoPath().projection(transform).pointRadius(0.5);
+
+
+
 
     d3.queue()
         .defer(d3.json, "./us-10m.json")
         .defer(d3.csv, "./20170701stations.csv")
         .await(ready);
+
 
     function ready(error, us, wstations) {
       if (error) {
@@ -47,7 +69,7 @@
       var min_tem = d3.min(wstations, function(d) { return +d.VALUE; });
       console.log(max_tem);
       console.log(min_tem);
-      var color = d3.scaleLinear().domain([min_tem, max_tem]).interpolate(d3.interpolateHcl).range(["#ffffb2","#e31a1c"]);
+      var color = d3.scaleLinear().domain([min_tem, max_tem]).interpolate(d3.interpolateHcl).range(["#fcfcde","#f20c0e"]);
 
       var defs = svg.append("defs");
       defs.append("path")
@@ -90,7 +112,7 @@
           .data(voronoi.map(function(cell) {
             return {type: "LineString", coordinates: cell.coordinates[0]};
           }))
-        .enter().append("path")
+          .enter().append("path")
           .attr("class", "voronoi-border")
           .attr("d", path);
 
@@ -98,7 +120,35 @@
           .datum({type: "MultiPoint", coordinates: coordinates})
           .attr("class", "points")
           .attr("d", path);
+
+
+
+    //   //MAPBOX GL MAKES IT INTERACTIVE'
+    // function update() {
+    //     g.attr("d", path);
+    // }
+
+    
+    // map.on("viewreset", update);
+    // map.on("movestart", function(){
+    //   svg.classed("hidden", true);
+    // }); 
+    // map.on("rotate", function(){
+    //   svg.classed("hidden", true);
+    // }); 
+    // map.on("moveend", function(){
+    //   update()
+    //   svg.classed("hidden", false);
+    // });
+
+    // update()
+
     }
+
+    // function projectPoint(lon, lat) {
+    //       var point = map.project(new mapboxgl.LngLat(lon, lat));
+    //       this.stream.point(point.x, point.y);
+    // }
     </script>
   </body>
 </html>
