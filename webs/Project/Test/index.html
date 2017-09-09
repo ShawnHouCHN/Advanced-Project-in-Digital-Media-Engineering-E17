@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>US Urban Area Voronoi</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.css"/>
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script src="//d3js.org/d3-queue.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="./d3.geo.voronoi.js?1"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+    var width = 1800,
+        height = 1500;
+
+    var projection = d3.geoAlbers()
+        .scale(800)
+        .translate([width/2,height/2])
+        .precision(0.01);
+
+    var path = d3.geoPath()
+        .projection(projection)
+        .pointRadius(0.5);
+
+    var svg = d3.selectAll("#map").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    //var fill = d3.scaleOrdinal(d3.schemeCategory20c);
+
+    d3.queue()
+        .defer(d3.json, "./us-10m.json")
+        .defer(d3.csv, "./20170701stations.csv")
+        .await(ready);
+
+    function ready(error, us, wstations) {
+      if (error) {
+        console.log(error);
+      }
+
+      var max_tem = d3.max(wstations, function(d) { return +d.VALUE; });
+      var min_tem = d3.min(wstations, function(d) { return +d.VALUE; });
+      console.log(max_tem);
+      console.log(min_tem);
+      var color = d3.scaleLinear().domain([min_tem, max_tem]).interpolate(d3.interpolateHcl).range(["#ffffb2","#e31a1c"]);
+
+      var defs = svg.append("defs");
+      defs.append("path")
+          .datum(topojson.feature(us, us.objects.land))
+          .attr("id", "land")
+          .attr("d", path);
+
+      defs.append("clipPath")
+          .attr("id", "clip")
+        .append("use")
+          .attr("xlink:href", "#land");
+
+      svg.append("use")
+          .attr("xlink:href", "#land")
+          .attr("class", "land");
+
+      var coordinates = wstations.map(function(d) { return [+d.LON, +d.LAT]; });
+
+      var voronoi = geoVoronoi(coordinates, geoDelaunay(coordinates)).geometries;
+
+      var g = svg.append("g").attr("clip-path", "url(#clip)");
+      g.selectAll(".voronoi")
+          .data(voronoi)
+          .enter().append("path")
+          .attr("class", "voronoi")
+          .style("fill", function(d, i) { return color(wstations[i].VALUE) ; })
+          .attr("d", path)
+          .append("title")
+          .text(function(_, i) {
+            var d = wstations[i];
+            return d.NAME;
+          });
+
+      g.append("path")
+          .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+          .attr("class", "states")
+          .attr("d", path);
+
+      g.selectAll(".voronoi-border")
+          .data(voronoi.map(function(cell) {
+            return {type: "LineString", coordinates: cell.coordinates[0]};
+          }))
+        .enter().append("path")
+          .attr("class", "voronoi-border")
+          .attr("d", path);
+
+      svg.append("path")
+          .datum({type: "MultiPoint", coordinates: coordinates})
+          .attr("class", "points")
+          .attr("d", path);
+    }
+    </script>
+  </body>
+</html>

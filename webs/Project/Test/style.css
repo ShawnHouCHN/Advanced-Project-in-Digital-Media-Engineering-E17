@@ -1,0 +1,28 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  width: 960px;
+  height: 500px;
+  position: relative;
+}
+
+canvas {
+  cursor: move;
+}
+
+path {
+  stroke-linejoin: round;
+}
+
+.voronoi-border {
+  stroke: #fff;
+  fill: none;
+}
+
+.points {
+  pointer-events: none;
+}
+
+.states {
+  stroke: #000;
+  fill: none;
+}

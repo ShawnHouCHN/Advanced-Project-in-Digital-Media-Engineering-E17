@@ -28,11 +28,11 @@
         .selectAll("path")
         .data(stateData)
         .enter().append("path")
-            .attr("d", function(d) {return "M" + d.projected});    
+        .attr("d", function(d) {return "M" + d.projected});    
 
     var states = g.selectAll("g")
         .data(stateData)
-      .enter().append("g")
+        .enter().append("g")
         .attr("id", function(d) {return d.name})
 
 
