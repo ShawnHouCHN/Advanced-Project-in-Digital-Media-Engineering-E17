@@ -2,55 +2,69 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <title>US Urban Area Voronoi</title>
     <link rel="stylesheet" href="./style.css"/>
-    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
     <script src="http://d3js.org/d3.v4.min.js"></script>
     <script src="//d3js.org/d3-queue.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="./d3.geo.voronoi.js?1"></script>
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.12.0/mapbox-gl.js'></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.js'></script>
   </head>
   <body>
     <div id="map"></div>
     <script>
 
-    var width = 1800,
-        height = 1500;
+    //var width = 960,
+    //    height = 500;
 
-    // mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpbWl6dSIsImEiOiI0cl85c2pNIn0.RefZMaOzNn-IistVe-Zcnw'
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhd25ob3VjaG4iLCJhIjoiY2o3Zjk0ZHFnMGFzazMzdDVrbmNpZHRtdSJ9.DSIktmYLgaYD8bktKOMv1A'
         
-    // //Setup mapbox-gl map
-    // var map = new mapboxgl.Map({
-    //     container: 'map', // container id
-    //     style: 'mapbox://styles/mapbox/streets-v8',
-    //     center: [-106, 37.5],
-    //     zoom: 4,  
-    // });
+    //Setup mapbox-gl map
+    var map = new mapboxgl.Map({
+        container: 'map', // container id
+        style: 'mapbox://styles/mapbox/dark-v9',
+        center: [-96, 38.3],
+        zoom: 3,  
+    });
     
-    // map.addControl(new mapboxgl.Navigation());
-
-    // var container = map.getCanvasContainer()
+    map.addControl(new mapboxgl.NavigationControl());
 
 
-    var projection = d3.geoMercator()
-        .scale(850)
-        .translate([width/2,height/2])
-        .center([-106, 37.5])
-        .precision(0.01);
+    var container = map.getCanvasContainer();
+
+    function getD3() {
+      var bbox = document.body.getBoundingClientRect();
+      var center = map.getCenter();
+      var zoom = map.getZoom();
+      // 512 is hardcoded tile size, might need to be 256 or changed to suit your map config
+      var scale = (512) * 0.5 / Math.PI * Math.pow(2, zoom);
+
+      var d3projection = d3.geoMercator()
+        .center([center.lng, center.lat])
+        .translate([bbox.width/2, bbox.height/2])
+        .scale(scale).precision(0.01);
+
+      return d3projection;
+    }
+
+
+    // var projection = d3.geoMercator()
+    //     .scale(850)
+    //     .translate([width/2,height/2])
+    //     .center([-106, 37.5])
+    //     .precision(0.01);
+    var d3Projection = getD3();
 
     var path = d3.geoPath()
-        .projection(projection)
+        .projection(getD3())
         .pointRadius(0.5);
 
 
-    var svg = d3.select("#map").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
-    // var transform = d3.geoTransform({point: projectPoint});
-    // var path = d3.geoPath().projection(transform).pointRadius(0.5);
-
+    var svg = d3.select(container).append("svg")
+         .attr("width", window.innerWidth)
+         .attr("height", window.innerHeight);
 
 
 
@@ -67,14 +81,14 @@
 
       var max_tem = d3.max(wstations, function(d) { return +d.VALUE; });
       var min_tem = d3.min(wstations, function(d) { return +d.VALUE; });
-      console.log(max_tem);
-      console.log(min_tem);
+
       var color = d3.scaleLinear().domain([min_tem, max_tem]).interpolate(d3.interpolateHcl).range(["#fcfcde","#f20c0e"]);
 
       var defs = svg.append("defs");
       defs.append("path")
           .datum(topojson.feature(us, us.objects.land))
           .attr("id", "land")
+          .style("opacity", .2)
           .attr("d", path);
 
       defs.append("clipPath")
@@ -96,6 +110,7 @@
           .enter().append("path")
           .attr("class", "voronoi")
           .style("fill", function(d, i) { return color(wstations[i].VALUE) ; })
+          .style("fill-opacity", 0.5)
           .attr("d", path)
           .append("title")
           .text(function(_, i) {
@@ -124,31 +139,30 @@
 
 
     //   //MAPBOX GL MAKES IT INTERACTIVE'
-    // function update() {
-    //     g.attr("d", path);
-    // }
+    function update() {
+        d3Projection = getD3();
+        path.projection(d3Projection);
+        svg.selectAll("path").attr("d", path);
+    }
 
     
-    // map.on("viewreset", update);
-    // map.on("movestart", function(){
-    //   svg.classed("hidden", true);
-    // }); 
-    // map.on("rotate", function(){
-    //   svg.classed("hidden", true);
-    // }); 
-    // map.on("moveend", function(){
-    //   update()
-    //   svg.classed("hidden", false);
-    // });
+    map.on("viewreset", update);
+    map.on("movestart", function(){
+      svg.classed("hidden", true);
+    }); 
+    map.on("rotate", function(){
+      svg.classed("hidden", true);
+    }); 
+    map.on("moveend", function(){
+      update()
+      svg.classed("hidden", false);
+    });
 
-    // update()
+    //map.resize();
+    update()
 
     }
 
-    // function projectPoint(lon, lat) {
-    //       var point = map.project(new mapboxgl.LngLat(lon, lat));
-    //       this.stream.point(point.x, point.y);
-    // }
     </script>
   </body>
 </html>
