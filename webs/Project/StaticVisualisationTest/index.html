@@ -14,6 +14,22 @@
   </head>
   <body>
     <div id="map"></div>
+
+    <div class='map-overlay top'>
+    <div class='map-overlay-inner'>
+        <h2>Daily Highest Temperature of USA</h2>
+        <label id='Date'></label>
+        <input id='slider' type='range' min='0' max='365' step='1' value='0' />
+    </div>
+    <div class='map-overlay-inner'>
+        <div id='legend' class='legend'>
+            <div class='bar'></div>
+            <div>Temperature (F)</div>
+        </div>
+    </div>
+    </div>
+
+
     <script>
 
     //var width = 960,
@@ -110,7 +126,7 @@
           .enter().append("path")
           .attr("class", "voronoi")
           .style("fill", function(d, i) { return color(wstations[i].VALUE) ; })
-          .style("fill-opacity", 0.5)
+          .style("fill-opacity", .5)
           .attr("d", path)
           .append("title")
           .text(function(_, i) {
@@ -131,10 +147,10 @@
           .attr("class", "voronoi-border")
           .attr("d", path);
 
-      svg.append("path")
-          .datum({type: "MultiPoint", coordinates: coordinates})
-          .attr("class", "points")
-          .attr("d", path);
+      // svg.append("path")
+      //     .datum({type: "MultiPoint", coordinates: coordinates})
+      //     .attr("class", "points")
+      //     .attr("d", path);
 
 
 
