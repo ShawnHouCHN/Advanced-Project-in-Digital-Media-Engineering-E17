@@ -8,7 +8,7 @@
         zoom: 3,  
     });
     
-    map.addControl(new mapboxgl.NavigationControl());
+    //map.addControl(new mapboxgl.NavigationControl());
 
 
     var container = map.getCanvasContainer();
@@ -48,21 +48,25 @@
 
 
     d3.queue()
-        .defer(d3.json, "./us-10m.json")
-        .defer(d3.csv, "./stations_meta.csv")
-        .defer(d3.csv, "./stations_values.csv")
+        .defer(d3.json, "mapboxgl/data/us-10m.json")
+        .defer(d3.csv, "mapboxgl/data/stations_meta.csv")
+        .defer(d3.csv, "mapboxgl/data/stations_values.csv")
         .await(ready);
 
+     var voronoi, tmax_data, color, g; //GLOBAL VARIRABLEs
 
     function ready(error, us, wstations, drecords) {
       if (error) {
         console.log(error);
       }
 
-      var max_tem = d3.max(drecords, function(d) { return +d['20170601']; });
-      var min_tem = d3.min(drecords, function(d) { return +d['20170601']; });
+      tmax_data=drecords;
 
-      var color = d3.scaleLinear().domain([min_tem, max_tem]).interpolate(d3.interpolateHcl).range(["#fcfcde","#f20c0e"]);
+      var max_tem = d3.max(drecords, function(d) { return +d['20160601']; });
+      var min_tem = d3.min(drecords, function(d) { return +d['20160601']; });
+      
+
+      color = d3.scaleLinear().domain([-200, 400]).interpolate(d3.interpolateHcl).range(["#ffff8c","#f20c0e"]).clamp(true);
 
       var defs = svg.append("defs");
       defs.append("path")
@@ -76,20 +80,57 @@
         .append("use")
           .attr("xlink:href", "#land");
 
+
+      var linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
+      var legendWidth=20, legendHeight=200;
+      linearGradient.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+      //Set the color for the start (0%)
+      linearGradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffff8c"); //light blue
+      linearGradient.append("stop").attr("offset", "100%").attr("stop-color", "#f20c0e"); //dark blue
+
+      var legendsvg = svg.append("g").attr("class", "legendWrapper")
+      legendsvg.append("rect")
+      .attr("class", "legendRect")
+      .attr("width", legendWidth)
+      .attr("height", legendHeight)
+      .style("fill", "url(#linear-gradient)")
+      .attr("transform", "translate(" + (window.innerWidth - 40) + "," + (50) + ")");
+
+
+      var yScale = d3.scaleLinear()
+         .range([0, legendHeight])
+         .domain([-200,400]);
+         //.domain([d3.min(pt.legendSOM.colorData)/100, d3.max(pt.legendSOM.colorData)/100]);
+
+      //Define y-axis
+      var yAxis = d3.axisLeft(yScale)
+          .ticks(5);  //Set rough # of ticks
+          //.tickFormat(formatPercent)
+
+      //Set up X axis
+      legendsvg.append("g")
+        .attr("class", "yxis")  //Assign "axis" class
+        .attr("transform", "translate(" + (window.innerWidth - 50) + "," + (50) + ")")
+        .style("stroke","red")
+        .call(yAxis);
+
+
+
       svg.append("use")
           .attr("xlink:href", "#land")
           .attr("class", "land");
 
       var coordinates = wstations.map(function(d) { return [+d.LON, +d.LAT]; });
 
-      var voronoi = geoVoronoi(coordinates, geoDelaunay(coordinates)).geometries;
+      voronoi = geoVoronoi(coordinates, geoDelaunay(coordinates)).geometries;
 
-      var g = svg.append("g").attr("clip-path", "url(#clip)");
+      g = svg.append("g").attr("clip-path", "url(#clip)");
       g.selectAll(".voronoi")
           .data(voronoi)
           .enter().append("path")
           .attr("class", "voronoi")
-          .style("fill", function(d, i) { return color(drecords[i]['20170601']) ; })
+          .style("fill", function(d, i) { return color(drecords[i]['20160601']) ; })
           .style("fill-opacity", .5)
           .attr("d", path)
           .append("title")
@@ -141,4 +182,9 @@
     //map.resize();
     update()
 
-    }
+    };
+
+
+
+
+
