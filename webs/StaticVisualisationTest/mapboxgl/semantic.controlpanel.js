@@ -35,7 +35,7 @@ $(document).ready(function() {
         
       $('.message').transition('fade up');
       $('.message').attr("hidden", false)
-       //replay(tmax_data);
+       replay(tmax_data);
 
         
 
