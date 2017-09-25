@@ -12,7 +12,7 @@ function time_update(date) {
 
   g.selectAll(".voronoi").data(voronoi)
         .transition(t)        // apply a transition
-        .style("fill", function(d, i) { return color(tmax_data[i][date]/10);
+        .style("fill", function(d, i) { return color(tmax_data[i][date]);
         });
 
 
