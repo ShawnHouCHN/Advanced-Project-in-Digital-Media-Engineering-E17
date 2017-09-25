@@ -66,7 +66,7 @@
       var min_tem = d3.min(drecords, function(d) { return +d['20160601']; });
       
 
-      color = d3.scaleLinear().domain([-200, 400]).interpolate(d3.interpolateHcl).range(["#ffff8c","#f20c0e"]).clamp(true);
+      color = d3.scaleLinear().domain([-200, 0, 400]).interpolate(d3.interpolateHcl).range(["#355ae0","#fcf4d9","#f20c0e"]).clamp(true);
 
       var defs = svg.append("defs");
       defs.append("path")
@@ -86,7 +86,8 @@
       var legendWidth=20, legendHeight=200;
       linearGradient.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
       //Set the color for the start (0%)
-      linearGradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffff8c"); //light blue
+      linearGradient.append("stop").attr("offset", "0%").attr("stop-color", "#355ae0"); //light blue
+      linearGradient.append("stop").attr("offset", "50%").attr("stop-color", "#fcf4d9"); //light blue
       linearGradient.append("stop").attr("offset", "100%").attr("stop-color", "#f20c0e"); //dark blue
 
       var legendsvg = svg.append("g").attr("class", "legendWrapper")
@@ -100,7 +101,7 @@
 
       var yScale = d3.scaleLinear()
          .range([0, legendHeight])
-         .domain([-200,400]);
+         .domain([-40,40]);
          //.domain([d3.min(pt.legendSOM.colorData)/100, d3.max(pt.legendSOM.colorData)/100]);
 
       //Define y-axis

@@ -12,7 +12,7 @@ function time_update(date) {
 
   g.selectAll(".voronoi").data(voronoi)
         .transition(t)        // apply a transition
-        .style("fill", function(d, i) { return color(tmax_data[i][date]);
+        .style("fill", function(d, i) { return color(tmax_data[i][date]/10);
         });
 
 
@@ -24,6 +24,10 @@ function replay(data) {
   tmax_data.columns.forEach(function(date, index){
     setTimeout(function(){
       time_update(date);
+      console.log(date);
+
+      $(".clock").html(date);
+
     }, index * 1400);
   });
 }
@@ -33,8 +37,6 @@ function replay(data) {
 $(document).ready(function() {
   $(".button").click(function(){
         
-      $('.message').transition('fade up');
-      $('.message').attr("hidden", false)
        replay(tmax_data);
 
         
