@@ -41,7 +41,8 @@
         .pointRadius(0.5);
 
 
-    var svg = d3.select(container).append("svg")
+    var svg_vor = d3.select(container).append("svg")
+         .attr("id", "voronoi")
          .attr("width", window.innerWidth)
          .attr("height", window.innerHeight);
 
@@ -51,25 +52,24 @@
         .defer(d3.json, "mapboxgl/data/us-10m.json")
         .defer(d3.csv, "mapboxgl/data/stations_meta.csv")
         .defer(d3.csv, "mapboxgl/data/stations_values.csv")
-        .defer(d3.csv, "mapboxgl/data/county_values.csv")
         .await(ready);
 
-     var voronoi, tmax_data, color, g, tmax_county; //GLOBAL VARIRABLEs
+     var voronoi, tmax_data_voro, color_voro, g_voro; //GLOBAL VARIRABLEs
 
-    function ready(error, us, wstations, drecords, crecords) {
+    function ready(error, us, wstations, drecords) {
       if (error) {
         console.log(error);
       }
 
-      tmax_data=drecords;
+      tmax_data_voro=drecords;
 
       var max_tem = d3.max(drecords, function(d) { return +d['20160601']; });
       var min_tem = d3.min(drecords, function(d) { return +d['20160601']; });
       
 
-      color = d3.scaleLinear().domain([-200, 0, 400]).interpolate(d3.interpolateHcl).range(["#355ae0","#fcf4d9","#f20c0e"]).clamp(true);
+      color_voro = d3.scaleLinear().domain([-200, 0, 400]).interpolate(d3.interpolateHcl).range(["#355ae0","#fcf4d9","#f20c0e"]).clamp(true);
 
-      var defs = svg.append("defs");
+      var defs = svg_vor.append("defs");
       defs.append("path")
           .datum(topojson.feature(us, us.objects.land))
           .attr("id", "land")
@@ -91,7 +91,7 @@
       linearGradient.append("stop").attr("offset", "40%").attr("stop-color", "#fcf4d9"); //light blue
       linearGradient.append("stop").attr("offset", "100%").attr("stop-color", "#f20c0e"); //dark blue
 
-      var legendsvg = svg.append("g").attr("class", "legendWrapper")
+      var legendsvg = svg_vor.append("g").attr("class", "legendWrapper")
       legendsvg.append("rect")
       .attr("class", "legendRect")
       .attr("width", legendWidth)
@@ -119,7 +119,7 @@
 
 
 
-      svg.append("use")
+      svg_vor.append("use")
           .attr("xlink:href", "#land")
           .attr("class", "land");
 
@@ -127,12 +127,12 @@
 
       voronoi = geoVoronoi(coordinates, geoDelaunay(coordinates)).geometries;
 
-      g = svg.append("g").attr("clip-path", "url(#clip)");
-      g.selectAll(".voronoi")
+      g_voro = svg_vor.append("g").attr("clip-path", "url(#clip)");
+      g_voro.selectAll(".voronoi")
           .data(voronoi)
           .enter().append("path")
           .attr("class", "voronoi")
-          .style("fill", function(d, i) { return color(drecords[i]['20160601']) ; })
+          .style("fill", function(d, i) { return color_voro(drecords[i]['20160601']) ; })
           .style("fill-opacity", .5)
           .attr("d", path)
           .append("title")
@@ -141,12 +141,12 @@
             return d.NAME;
           });
 
-      g.append("path")
+      g_voro.append("path")
           .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
           .attr("class", "states")
           .attr("d", path);
 
-      g.selectAll(".voronoi-border")
+      g_voro.selectAll(".voronoi-border")
           .data(voronoi.map(function(cell) {
             return {type: "LineString", coordinates: cell.coordinates[0]};
           }))
@@ -165,20 +165,20 @@
         function update() {
             d3Projection = getD3();
             path.projection(d3Projection);
-            svg.selectAll("path").attr("d", path);
+            svg_vor.selectAll("path").attr("d", path);
         }
 
         
         map.on("viewreset", update);
         map.on("movestart", function(){
-          svg.classed("hidden", true);
+          svg_vor.classed("hidden", true);
         }); 
         map.on("rotate", function(){
-          svg.classed("hidden", true);
+          svg_vor.classed("hidden", true);
         }); 
         map.on("moveend", function(){
           update()
-          svg.classed("hidden", false);
+          svg_vor.classed("hidden", false);
         });
 
         //map.resize();
