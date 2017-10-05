@@ -51,11 +51,12 @@
         .defer(d3.json, "mapboxgl/data/us-10m.json")
         .defer(d3.csv, "mapboxgl/data/stations_meta.csv")
         .defer(d3.csv, "mapboxgl/data/stations_values.csv")
+        .defer(d3.csv, "mapboxgl/data/county_values.csv")
         .await(ready);
 
-     var voronoi, tmax_data, color, g; //GLOBAL VARIRABLEs
+     var voronoi, tmax_data, color, g, tmax_county; //GLOBAL VARIRABLEs
 
-    function ready(error, us, wstations, drecords) {
+    function ready(error, us, wstations, drecords, crecords) {
       if (error) {
         console.log(error);
       }
@@ -87,7 +88,7 @@
       linearGradient.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
       //Set the color for the start (0%)
       linearGradient.append("stop").attr("offset", "0%").attr("stop-color", "#355ae0"); //light blue
-      linearGradient.append("stop").attr("offset", "50%").attr("stop-color", "#fcf4d9"); //light blue
+      linearGradient.append("stop").attr("offset", "40%").attr("stop-color", "#fcf4d9"); //light blue
       linearGradient.append("stop").attr("offset", "100%").attr("stop-color", "#f20c0e"); //dark blue
 
       var legendsvg = svg.append("g").attr("class", "legendWrapper")
@@ -101,7 +102,7 @@
 
       var yScale = d3.scaleLinear()
          .range([0, legendHeight])
-         .domain([-40,40]);
+         .domain([-40,60]);
          //.domain([d3.min(pt.legendSOM.colorData)/100, d3.max(pt.legendSOM.colorData)/100]);
 
       //Define y-axis
@@ -160,28 +161,28 @@
 
 
 
-    //   //MAPBOX GL MAKES IT INTERACTIVE'
-    function update() {
-        d3Projection = getD3();
-        path.projection(d3Projection);
-        svg.selectAll("path").attr("d", path);
-    }
+        //   //MAPBOX GL MAKES IT INTERACTIVE'
+        function update() {
+            d3Projection = getD3();
+            path.projection(d3Projection);
+            svg.selectAll("path").attr("d", path);
+        }
 
-    
-    map.on("viewreset", update);
-    map.on("movestart", function(){
-      svg.classed("hidden", true);
-    }); 
-    map.on("rotate", function(){
-      svg.classed("hidden", true);
-    }); 
-    map.on("moveend", function(){
-      update()
-      svg.classed("hidden", false);
-    });
+        
+        map.on("viewreset", update);
+        map.on("movestart", function(){
+          svg.classed("hidden", true);
+        }); 
+        map.on("rotate", function(){
+          svg.classed("hidden", true);
+        }); 
+        map.on("moveend", function(){
+          update()
+          svg.classed("hidden", false);
+        });
 
-    //map.resize();
-    update()
+        //map.resize();
+        update()
 
     };
 

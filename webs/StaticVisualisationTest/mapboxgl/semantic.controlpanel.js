@@ -35,6 +35,9 @@ function replay(data) {
 
 
 $(document).ready(function() {
+
+  $('.search').val('Voronoi');
+
   $(".button").click(function(){
         
        replay(tmax_data);
