@@ -97,20 +97,7 @@
             return 0.5;
           }
         })
-        .attr("d", path)
-        .append("title")
-        .text(function(d) {
-          d.id=d.id.toString();
-          if(d.id.length<5) {
-            d.id='0'+ d.id.toString();
-          }
-          //county is not in our list
-          if(county_map.keys().indexOf(d.id) < 0){
-            return -9999;
-          }
-
-
-          return +county_map.get(d.id)['20160601']/10 ; });
+        .attr("d", path);
 
       svg_chor.append("path")
           .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))

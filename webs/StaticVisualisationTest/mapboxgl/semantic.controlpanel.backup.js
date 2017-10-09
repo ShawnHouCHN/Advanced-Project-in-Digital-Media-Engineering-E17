@@ -16,32 +16,33 @@ function time_update_voro(date) {
 
 };
 
-function time_update_choro(date, index) {
-  var t = d3.transition().duration(2000);
+function time_update_choro(date) {
+
+  if(typeof(county_map.get('01001')[date]) === 'undefined'){
+           console.log('END');
+           return 0;
+  }
+
+  var t = d3.transition().duration(1000);
+  $(".clock").html(date);
   svg_chor.selectAll(".counties").transition(t).filter(function(d) {
+        var prev_tem = parseInt(d3.select(this).select("title").text());
           d.id=d.id.toString(); 
           if(d.id.length<5) {
             d.id='0'+ d.id.toString();
           }
-
-          if(index==0){
-            return (county_map.keys().indexOf(d.id) > 0);
-          }
-          else{
-            
-            var year = date.toString().substr(0,4),month = date.toString().substr(4,2), day = date.toString().substr(6,2);           
-            var curr_date = new Date(year,month-1,day);
-            var pre_date = new Date(curr_date.setDate(curr_date.getDate()-1));
-            pre_date.setMinutes(pre_date.getMinutes() - pre_date.getTimezoneOffset())   
-            var _last=pre_date.toISOString().slice(0,10).replace(/-/g,"");                 
-            //console.log(d.id, " " , _last);
-            return (county_map.keys().indexOf(d.id) > 0 && Math.round(Math.abs(+county_map.get(d.id)[_last] - +county_map.get(d.id)[date])/10) > 2 );
-          }
+          return (county_map.keys().indexOf(d.id) > 0 && Math.abs(prev_tem * 10 - +county_map.get(d.id)[date])/10 > 5);
         })
-        .attr("delay", function(d, i){
-          return Math.round(county_map.get(d.id)[date]);})
-        .attrTween("fill",function(d, i) { 
-          return d3.interpolateRgb(this.getAttribute("fill"), color_chro(+county_map.get(d.id)[date]));
+        .attr("fill", function(d, i) { 
+          return color_chro(+county_map.get(d.id)[date]);
+        })
+        .delay(750)
+        .on("end", function(){ 
+          var y = date.toString().substr(0,4),m = date.toString().substr(4,2), d = date.toString().substr(6,2);
+          var curr_date = new Date(y,m-1,d);
+          var tom_date = new Date(curr_date.getTime() + (24 * 60 * 60 * 1000));
+          //console.log(tom_date);
+          time_update_choro(tom_date.toISOString().slice(0,10).replace(/-/g,""));
         });
 }
 
@@ -61,21 +62,17 @@ function replay() {
 
 
   else if($('.search').find(":selected").val()=="Choropleth"){
-    //var timer=d3.timer(function() {
-      //console.log('Hallo');
-      tmax_data_chro.columns.forEach(function(date, index){
-        setTimeout(function(){
-          if(date=="FIPS"){
-            return 0;
-          }
 
-          time_update_choro(date, index);
+      //tmax_data_chro.columns.forEach(function(date, index){
+      //  d3.timer(function(){
 
-          $(".clock").html(date);
 
-        }, index * 3000);
-      });    
-    //});
+          time_update_choro(startDate);
+
+          //$(".clock").html(date);
+
+       // }, index * 1400);
+      //});    
   }
 }
 
