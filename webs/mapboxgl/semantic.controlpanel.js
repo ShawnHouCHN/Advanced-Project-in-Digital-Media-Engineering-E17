@@ -25,7 +25,7 @@ function time_update_choro(date, index) {
           }
 
           if(index==0){
-            return (county_map.keys().indexOf(d.id) > 0);
+            return (county_map.keys().indexOf(d.id) >= 0 );
           }
           else{
             
@@ -35,7 +35,7 @@ function time_update_choro(date, index) {
             pre_date.setMinutes(pre_date.getMinutes() - pre_date.getTimezoneOffset())   
             var _last=pre_date.toISOString().slice(0,10).replace(/-/g,"");                 
             //console.log(d.id, " " , _last);
-            return (county_map.keys().indexOf(d.id) > 0 && Math.round(Math.abs(+county_map.get(d.id)[_last] - +county_map.get(d.id)[date])/10) > 2 );
+            return (county_map.keys().indexOf(d.id) >= 0  && Math.round(Math.abs(+county_map.get(d.id)[_last] - +county_map.get(d.id)[date])/10) > 2 );
           }
         })
         .attr("delay", function(d, i){

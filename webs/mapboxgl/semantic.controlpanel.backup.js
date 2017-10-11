@@ -31,7 +31,7 @@ function time_update_choro(date) {
           if(d.id.length<5) {
             d.id='0'+ d.id.toString();
           }
-          return (county_map.keys().indexOf(d.id) > 0 && Math.abs(prev_tem * 10 - +county_map.get(d.id)[date])/10 > 5);
+          return (county_map.keys().indexOf(d.id) >= 0 && Math.abs(prev_tem * 10 - +county_map.get(d.id)[date])/10 > 5);
         })
         .attr("fill", function(d, i) { 
           return color_chro(+county_map.get(d.id)[date]);
