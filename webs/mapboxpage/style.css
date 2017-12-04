@@ -82,3 +82,8 @@ path {
     cursor: ew-resize;
 }
 
+.clock {
+  color: #1dcaff; 
+  font-family:arial; 
+  font-size: 30px; 
+}

@@ -8,7 +8,7 @@ var startDate = "20160101", endDate = "20161231";
 // });
 
 function time_update_voro(date) {
-  var t = d3.transition().duration(1000);
+  var t = d3.transition().duration(2000);
 
   g_voro.selectAll(".voronoi").data(voronoi).transition(t)        // apply a transition
         .style("fill", function(d, i) { return color_voro(tmax_data_voro[i][date]);
@@ -45,6 +45,36 @@ function time_update_choro(date, index) {
         });
 }
 
+function time_update_tweets(date, index) {
+  var t = d3.transition().duration(2000);
+  svg_tweet.selectAll(".counties").transition(t).filter(function(d) {
+          d.id=d.id.toString(); 
+          if(d.id.length<5) {
+            d.id='0'+ d.id.toString();
+          }
+
+          if(index==0){
+            return (tweets_map.keys().indexOf(d.id) >= 0 );
+          }
+          else{
+            
+            var year = date.toString().substr(0,4),month = date.toString().substr(4,2), day = date.toString().substr(6,2);           
+            var curr_date = new Date(year,month-1,day);
+            var pre_date = new Date(curr_date.setDate(curr_date.getDate()-1));
+            pre_date.setMinutes(pre_date.getMinutes() - pre_date.getTimezoneOffset())   
+            var _last=pre_date.toISOString().slice(0,10).replace(/-/g,"");                 
+            //console.log(d.id, " " , _last);
+            return (tweets_map.keys().indexOf(d.id) >= 0  && Math.abs(+tweets_map.get(d.id)[_last] - +tweets_map.get(d.id)[date]) > 0.01);
+          }
+        })
+        .attr("delay", function(d, i){
+          return tweets_map.get(d.id)[date];})
+        .attrTween("fill",function(d, i) { 
+          return d3.interpolateRgb(this.getAttribute("fill"), color_tweets(+tweets_map.get(d.id)[date]));
+        });
+}
+
+
 function replay() {
 
   if ($('.search').find(":selected").val()=="Voronoi"){
@@ -52,9 +82,9 @@ function replay() {
      setTimeout(function(){
         time_update_voro(date);
 
-        $(".clock").html(date);
+        $(".clock").text(date);
 
-      }, index * 1400);
+      }, index * 3000);
     });
   }
 
@@ -71,12 +101,29 @@ function replay() {
 
           time_update_choro(date, index);
 
-          $(".clock").html(date);
+          $(".clock").text(date);
 
         }, index * 3000);
       });    
+  }
+
+  else if($('.search').find(":selected").val()=="Tweets"){
+    //var timer=d3.timer(function() {
+      tweets_data_chro.columns.forEach(function(date, index){
+        setTimeout(function(){
+          if(date=="FIPS"){
+            return 0;
+          }
+
+          time_update_tweets(date, index);
+
+          $(".clock").text(date);
+
+        }, index * 3000);
+      }); 
     //});
   }
+
 }
 
 
@@ -84,6 +131,7 @@ function replay() {
 $(document).ready(function() {
 
   d3.select("#choropleth").attr('visibility','hidden');
+  d3.select("#tweets").attr('visibility','hidden');
   $('.search').val('Voronoi');
 
   $(".button").click(function(){
@@ -98,10 +146,19 @@ $('.search').dropdown({
  onChange: function(val) {
     if (val=="Voronoi"){
        d3.select("#choropleth").attr('visibility','hidden');
+       d3.select("#tweets").attr('visibility','hidden');
        d3.select("#voronoi").attr('visibility','visible');
-    }else{
+       $('#style_title').text('Voronoi');
+    }else if(val=="Choropleth"){
        d3.select("#choropleth").attr('visibility','visible');
-       d3.select("#voronoi").attr('visibility','hidden');      
+       d3.select("#voronoi").attr('visibility','hidden');    
+       d3.select("#tweets").attr('visibility','hidden');
+       $('#style_title').text('Choropleth');
+    }else {
+       d3.select("#choropleth").attr('visibility','hidden');
+       d3.select("#voronoi").attr('visibility','hidden');    
+       d3.select("#tweets").attr('visibility','visible');  
+       $('#style_title').text('Tweets');    
     }
  }
 });

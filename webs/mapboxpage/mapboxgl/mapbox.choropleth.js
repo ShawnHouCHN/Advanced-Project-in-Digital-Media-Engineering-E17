@@ -17,7 +17,7 @@
         .defer(d3.csv, "mapboxgl/data/county_values_knn.csv", function(d) { county_map.set(d.FIPS, d); })
         .await(ready);
 
-    var tmax_data_chro, choropleth, color_chro, g_chro;
+    var tmax_data_chro, usa_map, color_chro, g_chro;
 
     function ready(error, us, crecords) {
       if (error) {
@@ -25,11 +25,7 @@
       }
 
       tmax_data_chro=crecords;
-      choropleth=topojson.feature(us, us.objects.counties).features;
-
-      var max_tem = d3.max(crecords, function(d) { return +d['20160601']; });
-      var min_tem = d3.min(crecords, function(d) { return +d['20160601']; });
-      
+      usa_map=us;    
 
       color_chro = d3.scaleLinear().domain([-200, 0, 400]).interpolate(d3.interpolateHcl).range(["#355ae0","#fcf4d9","#f20c0e"]).clamp(true);
 
