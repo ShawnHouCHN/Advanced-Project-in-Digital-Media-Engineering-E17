@@ -15,8 +15,8 @@ var line = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.temperature); });
 
-d3.tsv("/MasterProject/data/LA_linechart.tsv", type, function(error, data) {
-  console.log(data.columns);
+d3.tsv("/webs/MasterProject/data/LA_linechart.tsv", type, function(error, data) {
+
   var cities = data.columns.slice(1).map(function(id) {
     return {
       id: id,
