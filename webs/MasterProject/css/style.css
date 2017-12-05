@@ -537,6 +537,10 @@ h1, h2, h3, h4, h5, h6, figure {
   z-index: -1;
 }
 
+#gtco-intro .highlight-text{
+  color: #FF8C00;
+}
+
 #gtco-practice-areas .heading {
   position: relative;
 }
@@ -565,6 +569,26 @@ h1, h2, h3, h4, h5, h6, figure {
 #gtco-practice-areas .gtco-practice-area-item .gtco-icon {
   width: 100px;
 }
+
+.bar rect {
+  fill: #ff8c00;
+}
+
+.bar text {
+  fill: #fff;
+  font: 10px sans-serif;
+}
+
+.axis--x path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
 @media screen and (max-width: 768px) {
   #gtco-practice-areas .gtco-practice-area-item .gtco-icon {
     width: 70px;
