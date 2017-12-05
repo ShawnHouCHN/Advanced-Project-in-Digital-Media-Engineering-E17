@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<style>
+
+text {
+  font: 24px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+circle {
+  fill: #ccc;
+}
+
+.node:hover circle {
+  fill: orange;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var bleed = 100,
+    width = 960,
+    height = 760;
+
+var pack = d3.layout.pack()
+    .sort(null)
+    .size([width, height + bleed * 2])
+    .padding(2);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(0," + -bleed + ")");
+
+var packed_json;
+d3.json("data/keywords-remap.json", function(error, json) {
+
+  packed_json =pack.nodes(json);
+  var node = svg.selectAll(".node")
+      .data(packed_json)
+      .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("circle")
+      .attr("r", function(d) { return Math.floor(Math.random() * 60) + 10; });
+
+  node.append("text")
+      .text(function(d) { return d.Key; })
+      .style("font-size", function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 24) + "px"; })
+      .attr("dy", ".35em");
+});
+
+
+</script>
